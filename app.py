@@ -14,29 +14,39 @@ st.write(
     "using Polynomial Regression."
 )
 
-# AC Units input: minimum 1, maximum 150
+# Input
 ac_units = st.number_input(
     "Enter AC Consumption (AC Units)",
-    min_value=1.0,
-    max_value=150.0,
+    min_value=0.0,
     value=100.0,
     step=1.0
 )
 
-if st.button("Predict Bill"):
+# Show warning immediately for invalid input
+if ac_units <= 0:
+    st.error("⚠️ AC Units cannot be 0 or less. Please enter a value between 1 and 150.")
 
-    new_data = pd.DataFrame({
-        "AC_Units": [ac_units]
-    })
+elif ac_units > 150:
+    st.error("⚠️ AC Units cannot be more than 150. Please enter a value between 1 and 150.")
 
-    new_data_poly = poly.transform(new_data)
+else:
+    # Predict only when input is valid
+    if st.button("Predict Bill"):
 
-    prediction = model.predict(new_data_poly)
+        new_data = pd.DataFrame({
+            "AC_Units": [ac_units]
+        })
 
-    st.success("Model predicted successfully!")
+        # Convert input into polynomial features
+        new_data_poly = poly.transform(new_data)
 
-    st.metric(
-        "Predicted Electricity Bill",
-        f"₹{prediction[0]:,.2f}"
-    )
+        # Make prediction
+        prediction = model.predict(new_data_poly)
+
+        st.success("Model predicted successfully!")
+
+        st.metric(
+            "Predicted Electricity Bill",
+            f"₹{prediction[0]:,.2f}"
+        )
 
