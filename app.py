@@ -2,53 +2,38 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# Page configuration
-st.set_page_config(
-    page_title="Electricity Bill Predictor",
-    page_icon="⚡",
-    layout="centered"
-)
+# Load model
+model = joblib.load("electricity_bill.pkl")
+poly = joblib.load("polynomial_features.pkl")
 
-# Title
 st.title("⚡ Electricity Bill Prediction")
+
 st.write(
     "Predict your electricity bill based on AC consumption units "
     "using Polynomial Regression."
 )
 
-# Load trained model
-@st.cache_resource
-def load_model():
-    return joblib.load("electricity_bill.pkl")
+ac_units = st.number_input(
+    "Enter AC Consumption (AC Units)",
+    min_value=0.0,
+    value=100.0
+)
 
-try:
-    model = load_model()
+if st.button("Predict Bill"):
 
-    st.subheader("Enter AC Consumption")
+    # Create DataFrame with the same column name used during training
+    new_data = pd.DataFrame({
+        "AC_Units": [ac_units]
+    })
 
-    ac_units = st.number_input(
-        "AC Units",
-        min_value=0.0,
-        value=100.0,
-        step=1.0
+    # Convert input into polynomial features
+    new_data_poly = poly.transform(new_data)
+
+    # Make prediction
+    prediction = model.predict(new_data_poly)
+
+    st.success("Model predicted successfully!")
+    st.metric(
+        "Predicted Electricity Bill",
+        f"₹{prediction[0]:,.2f}"
     )
-
-    if st.button("Predict Electricity Bill"):
-        new_data = pd.DataFrame({
-            "AC_Units": [ac_units]
-        })
-
-        predicted_bill = model.predict(new_data)[0]
-
-        st.success(
-            f"Predicted Electricity Bill: ₹{predicted_bill:.2f}"
-        )
-
-except FileNotFoundError:
-    st.error(
-        "Model file not found. Please place "
-        "'electric_bill_model.pkl' in the same folder as app.py."
-    )
-
-except Exception as e:
-    st.error(f"An error occurred: {e}")
