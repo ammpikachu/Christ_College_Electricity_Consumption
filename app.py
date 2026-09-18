@@ -1,3 +1,4 @@
+```python
 import streamlit as st
 import pandas as pd
 import joblib
@@ -13,10 +14,13 @@ st.write(
     "using Polynomial Regression."
 )
 
+# AC Units input: minimum 1, maximum 150
 ac_units = st.number_input(
     "Enter AC Consumption (AC Units)",
-    min_value=0.0,
-    value=100.0
+    min_value=1.0,
+    max_value=150.0,
+    value=100.0,
+    step=1.0
 )
 
 if st.button("Predict Bill"):
@@ -33,7 +37,9 @@ if st.button("Predict Bill"):
     prediction = model.predict(new_data_poly)
 
     st.success("Model predicted successfully!")
+
     st.metric(
         "Predicted Electricity Bill",
         f"₹{prediction[0]:,.2f}"
     )
+```
